@@ -6,10 +6,19 @@ const HTTP_STATUS = require('../utils/httpStatus');
 class TaskController {
   async getAllTasks(req, res) {
     try {
+      console.log("req.traceID from controller", req.traceID)
       const { page, limit, status } = req.query;
       const parsedPage = parseInt(page) || 1; 
       const parsedLimit = parseInt(limit) || 10;
-      const tasksData = await taskService.getAllTasks(parsedPage, parsedLimit, status);
+      const whereClause = {};
+      if(status) {
+        whereClause.status = status;
+      }
+      if(!req.user.isAdmin) {
+        whereClause.createdBy = req.user.id;
+      }
+
+      const tasksData = await taskService.getAllTasks(parsedPage, parsedLimit, whereClause);
       const { tasks, totalCount } = tasksData;
       const totalPages = Math.ceil(totalCount / parsedLimit);
       res.status(HTTP_STATUS.OK).json({
@@ -23,15 +32,19 @@ class TaskController {
         }
       });
     } catch (err) {
-      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ 
-        status: 'error',
-        message: err.message 
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        status: "error",
+        message: err.message,
+        traceID: req.traceID,
       });
     }
   }
 
   async createTask(req, res) {
     try {
+      const data = req.body;
+      data.createdBy = req.user.id;
+      data.updatedBy = req.user.id;
       const newTask = await taskService.createTask(req.body);
       res.status(HTTP_STATUS.CREATED).json({
         status: 'success',
@@ -47,7 +60,9 @@ class TaskController {
 
   async updateTask(req, res) {
     try {
-      const updatedTask = await taskService.updateTask(req.params.id, req.body);
+      const data = req.body;
+      data.updatedBy = req.user.id;
+      const updatedTask = await taskService.updateTask(req.params.id, data);
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
         data: updatedTask

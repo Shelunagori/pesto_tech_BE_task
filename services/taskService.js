@@ -1,13 +1,12 @@
 // services/taskService.js
 const Task = require('../models/Task');
 class TaskService {
-  async getAllTasks(page = 1, limit = 10, status = null) {
-    let query = {};
-    if (status) {
-      query.status = status;
-    }
-
+  async getAllTasks(page = 1, limit = 10, query = {}) {
     const tasks = await Task.find(query)
+      .populate({
+        path: "createdBy",
+        select: "username  -_id",
+      })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
@@ -16,7 +15,7 @@ class TaskService {
 
     return {
       tasks,
-      totalCount
+      totalCount,
     };
   }
 

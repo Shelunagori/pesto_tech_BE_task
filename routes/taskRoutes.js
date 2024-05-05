@@ -3,10 +3,12 @@ const router = express.Router();
 const taskController = require('../controllers/taskController');
 const { validateTask } = require('../middlewares/validationMiddleware');
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
-
+const clsMiddleware = require("../middlewares/cls_hooked");
+const logger = require("../utils/logger");
 
 // GET all tasks
-router.get('/', jwtMiddleware, async (req, res) => {
+router.get("/", jwtMiddleware, clsMiddleware, async (req, res) => {
+  logger.info(`traceId: ${req.traceID}, apiName: "GET ALL TASK",`);
   await taskController.getAllTasks(req, res);
 });
 
