@@ -4,10 +4,10 @@ const userService = require('../services/userService');
 const HTTP_STATUS = require("../utils/httpStatus");
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    if (username && password) {
-      const user = await userService.authenticate(username, password);
+    if (email && password) {
+      const user = await userService.authenticate(email, password);
 
       if (!user) {
         return res
@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
     } else {
       res
         .status(HTTP_STATUS.BAD_REQUEST)
-        .json({ status: "error", message: "Invalid username & Password" });
+        .json({ status: "error", message: "Invalid email & Password" });
     }
   } catch (err) {
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Server Error");

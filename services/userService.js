@@ -2,9 +2,9 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
 // Authenticate user
-exports.authenticate = async (username, password) => {
-  // Find user by username
-  const user = await User.findOne({ username });
+exports.authenticate = async (email, password) => {
+  // Find user by email
+  const user = await User.findOne({ email });
 
   if (!user) {
     return null; // User not found

@@ -5,11 +5,34 @@ class TaskService {
     const tasks = await Task.find(query)
       .populate({
         path: "createdBy",
-        select: "username  -_id",
+        select: "name  -_id",
       })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
+
+    const groupTasks = await Task.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "users",
+          let: { createdBy: "$createdBy" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$createdBy"] } } },
+            { $project: { name: 1, _id: 0 } },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $group: {
+          _id: "$status",
+          tasks: { $push: "$$ROOT" },
+        },
+      },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+    ]);
 
     const totalCount = await Task.countDocuments(query);
 

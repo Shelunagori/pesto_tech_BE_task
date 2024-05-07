@@ -5,7 +5,7 @@ const HTTP_STATUS = require("../utils/httpStatus");
 describe("Login API Test", () => {
   it("should return 200 and a token on successful login", async () => {
     const response = await request(app).post("/api/auth/login").send({
-      username: "test_user",
+      email: "test_user",
       password: "test_password",
     });
     expect(response.status).toBe(HTTP_STATUS.OK); // Expecting status code 200
@@ -16,18 +16,18 @@ describe("Login API Test", () => {
   it("should return 401 for invalid credentials", async () => {
     const response = await request(app)
       .post("/api/auth/login")
-      .send({ username: "invalid_user", password: "invalid_password" });
+      .send({ email: "invalid_email", password: "invalid_password" });
 
     expect(response.status).toBe(HTTP_STATUS.UNAUTHORIZED); // Expecting status code 401 for unauthorized access
     expect(response.body.status).toBe("error");
     expect(response.body.message).toBe("Invalid credentials");
   });
 
-  it("should return 400 for missing username or password", async () => {
+  it("should return 400 for missing email or password", async () => {
     const response = await request(app)
       .post("/api/auth/login")
-      .send({ username: "test_user" }); // Missing password
+      .send({ email: "test_user" }); // Missing password
     expect(response.status).toBe(HTTP_STATUS.BAD_REQUEST); // Expecting status code 400 for bad request
-    expect(response.body.message).toBe("Invalid username & Password");
+    expect(response.body.message).toBe("Invalid email & Password");
   });
 });
